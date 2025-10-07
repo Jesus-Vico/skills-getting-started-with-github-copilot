@@ -1,9 +1,25 @@
 """
 High School Management System API
-
 A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
 """
+
+# --- Nueva función para eliminar participante ---
+from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
+import os
+from pathlib import Path
+
+app = FastAPI(title="Mergington High School API",
+              description="API for viewing and signing up for extracurricular activities")
+
+# Mount the static files directory
+current_dir = Path(__file__).parent
+app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
+          "static")), name="static")
+
+# In-memory activity database
 
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -65,7 +81,7 @@ activities = {
         "max_participants": 25,
         "participants": []
     },
-    
+
     "Math Olympiad": {
         "description": "Advanced math problem solving and competitions",
         "schedule": "Tuesdays, 5:00 PM - 6:30 PM",
@@ -80,6 +96,16 @@ activities = {
     }
 }
 
+@app.post("/activities/{activity_name}/remove")
+def remove_participant(activity_name: str, email: str):
+    """Remove a student from an activity"""
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    activity = activities[activity_name]
+    if email not in activity["participants"]:
+        raise HTTPException(status_code=400, detail="Student is not registered")
+    activity["participants"].remove(email)
+    return {"message": f"Removed {email} from {activity_name}"}
 
 @app.get("/")
 def root():
