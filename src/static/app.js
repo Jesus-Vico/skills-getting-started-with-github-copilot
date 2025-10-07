@@ -20,11 +20,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+          // Construir la lista de participantes con ícono de eliminar
+          let participantsSection = "";
+          if (details.participants.length > 0) {
+            participantsSection = `
+              <div class="participants-section">
+                <strong>Participants:</strong>
+                <ul class="participants-list">
+                  ${details.participants.map(p => `
+                    <li>
+                      <span class="participant-name">${p}</span>
+                      <span class="delete-icon" title="Remove participant" data-activity="${name}" data-participant="${p}">&#128465;</span>
+                    </li>
+                  `).join("")}
+                </ul>
+              </div>
+            `;
+          } else {
+            participantsSection = `
+              <div class="participants-section">
+                <strong>Participants:</strong>
+                <p class="no-participants">No participants yet.</p>
+              </div>
+            `;
+          }
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          ${participantsSection}
         `;
 
         activitiesList.appendChild(activityCard);
@@ -35,6 +61,30 @@ document.addEventListener("DOMContentLoaded", () => {
         option.textContent = name;
         activitySelect.appendChild(option);
       });
+
+      // Asignar eventos a los íconos de eliminar
+      document.querySelectorAll('.delete-icon').forEach(icon => {
+        icon.addEventListener('click', async (e) => {
+          const activity = icon.getAttribute('data-activity');
+          const participant = icon.getAttribute('data-participant');
+          if (confirm(`¿Eliminar a ${participant} de ${activity}?`)) {
+            try {
+              const response = await fetch(`/activities/${encodeURIComponent(activity)}/remove?email=${encodeURIComponent(participant)}`, {
+                method: 'POST',
+              });
+              const result = await response.json();
+              if (response.ok) {
+                fetchActivities(); // Recargar actividades
+              } else {
+                alert(result.detail || 'No se pudo eliminar al participante.');
+              }
+            } catch (error) {
+              alert('Error al eliminar al participante.');
+            }
+          }
+        });
+      });
+    // Fin del forEach principal
     } catch (error) {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
@@ -62,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Actualizar actividades tras registro
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";

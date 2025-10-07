@@ -142,3 +142,45 @@ footer {
   padding: 20px;
   color: #666;
 }
+
+.participants-section {
+  margin-top: 12px;
+  padding: 10px;
+  background-color: #e3eafc;
+  border-radius: 4px;
+  border: 1px solid #c5cae9;
+}
+
+.participants-section strong {
+  color: #3949ab;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.participants-list {
+  list-style-type: none;
+  margin-left: 0;
+  margin-bottom: 0;
+  color: #333;
+  padding-left: 0;
+}
+
+.no-participants {
+  color: #757575;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Estilo para el ícono de eliminar */
+.delete-icon {
+  display: inline-block;
+  margin-left: 8px;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 16px;
+  vertical-align: middle;
+  transition: color 0.2s;
+}
+.delete-icon:hover {
+  color: #a31515;
+}
